@@ -67,10 +67,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    private fun getSelectedMLService() : BaseAnalyser.MLService {
-        return when {
-            rbActMainMobileGMS.isChecked -> BaseAnalyser.MLService.GMS
-            rbActMainMobileHMS.isChecked -> BaseAnalyser.MLService.HMS
+    private fun getSelectedMLService(): BaseAnalyser.MLService =
+        when {
+            binding.rbActMainMobileGMS.isChecked -> BaseAnalyser.MLService.GMS
+            binding.rbActMainMobileHMS.isChecked -> BaseAnalyser.MLService.HMS
             else -> throw RuntimeException("Either GMS or HMS is available on this device!")
         }
     }

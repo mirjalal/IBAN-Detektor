@@ -28,5 +28,3 @@ object SepaQrParser {
 
     class ParseException(message : String) : IllegalStateException(message)
 }
-
-data class SepaData(val recipient : String, val iban : String, val bic : String, val usage : String, val amount : Double)

@@ -43,26 +43,25 @@ class IBANAnalyser(scannerOverlay: ScannerOverlay,
 
         textRecognizedData.postValue(possibleLines.isNotEmpty())
 
-        if(possibleLines.isNotEmpty()) {
+        if(possibleLines.isNotEmpty())
             Timber.d("Possible IBAN lines: ${possibleLines.joinToString(separator = ", ")}")
-        } else {
+        else
             postResult("")
-        }
 
         possibleLines.forEach { text ->
-                Timber.d("Possible IBAN: $text")
-                try {
-                    IbanUtil.validate(text)
-                    postResult(text)
-                    return
-                } catch (e: Exception) {
-                    Timber.e(e, "Invalid IBAN")
-                }
+            Timber.d("Possible IBAN: $text")
+            try {
+                IbanUtil.validate(text)
+                postResult(text)
+                return
+            } catch (e: Exception) {
+                Timber.e(e, "Invalid IBAN")
             }
+        }
     }
 
-    private fun detectLines(bitmap: Bitmap) : List<String> {
-        return when(mlService) {
+    private fun detectLines(bitmap: Bitmap) : List<String> =
+        when(mlService) {
             MLService.GMS -> {
                 val inputImage = InputImage.fromBitmap(bitmap, 0)
                 val result = Tasks.await(gmsTextRecognizer.process(inputImage))
@@ -79,7 +78,6 @@ class IBANAnalyser(scannerOverlay: ScannerOverlay,
                 result.blocks.flatMap { it.contents.map { l -> l.stringValue } }
             }
         }
-    }
 
     override fun close() {
         when(mlService) {

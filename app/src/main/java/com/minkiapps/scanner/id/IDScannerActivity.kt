@@ -23,5 +23,4 @@ class IDScannerActivity : BaseScannerActivity<IDResult>() {
             scannerOverlay().drawGraphicBlocks(listOf(it))
         }
     }
-
 }

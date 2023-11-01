@@ -167,11 +167,10 @@ abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scan
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
-        inline fun <reified T : AppCompatActivity>createIntent(context: Context, mobileService: BaseAnalyser.MLService) : Intent {
-            val intent = Intent(context, T::class.java)
-            intent.putExtra(EXTRA_MOBILE_SERVICE, mobileService)
-            return intent
+        inline fun <reified T : AppCompatActivity> createIntent(
+            context: Context, mobileService: BaseAnalyser.MLService
+        ): Intent = Intent(context, T::class.java).apply {
+            putExtra(EXTRA_MOBILE_SERVICE, mobileService)
         }
     }
-
 }
