@@ -13,7 +13,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
-import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_NONE
+import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
@@ -94,16 +94,25 @@ abstract class BaseScannerActivity<T> : AppCompatActivity() {
 
         cameraProviderFuture.addListener({
             lifecycle.addObserver(analyser)
+
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setResolutionStrategy(
+                    ResolutionStrategy(
+                        Size(TARGET_PREVIEW_WIDTH, TARGET_PREVIEW_HEIGHT),
+                        FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                    )
+                )
+                .build()
 
             // Preview
             val preview = Preview.Builder()
-                .setTargetResolution(Size(TARGET_PREVIEW_WIDTH, TARGET_PREVIEW_HEIGHT))
+                .setResolutionSelector(resolutionSelector)
                 .build()
 
             val imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetResolution(Size(TARGET_PREVIEW_WIDTH, TARGET_PREVIEW_HEIGHT))
+                .setResolutionSelector(resolutionSelector)
                 .build()
                 .also {
                     it.setAnalyzer(analyserExecutor, analyser)
