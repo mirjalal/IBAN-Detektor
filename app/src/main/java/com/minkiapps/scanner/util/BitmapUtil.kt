@@ -18,11 +18,11 @@ object BitmapUtil {
         )
         val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
         stream.close()
-        return rotateBitmap(bmp, metadata.rotation, false, false)
+        return rotateBitmap(bmp, metadata.rotation)
     }
 
     private fun rotateBitmap(
-        bitmap: Bitmap, rotationDegrees: Int, flipX: Boolean, flipY: Boolean
+        bitmap: Bitmap, rotationDegrees: Int, flipX: Boolean = false, flipY: Boolean = false
     ): Bitmap {
         val matrix = Matrix()
 

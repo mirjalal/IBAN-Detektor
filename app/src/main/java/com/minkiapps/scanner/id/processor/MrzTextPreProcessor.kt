@@ -13,10 +13,10 @@ private val regexE = Regex("<E+<")
 private val regexC = Regex("<C+<")
 private val nonValidMrzChar = Regex("[^\n<\\dA-Z]")
 
-private fun String.correctWrongFiller(vararg regexs : Regex) : String {
+private fun String.correctWrongFiller(vararg regexes: Regex) : String {
     var processed = this
-    regexs.forEach { r ->
-        while(processed.contains(r)) {
+    regexes.forEach { r ->
+        while (processed.contains(r)) {
             processed = processed.replace(r) { match ->
                 "<".repeat(match.value.length)
             }
@@ -25,20 +25,16 @@ private fun String.correctWrongFiller(vararg regexs : Regex) : String {
     return processed
 }
 
-private fun List<String>.fillToMinimumSize(minSize : Int) : List<String>{
-    return map {
-        if(it.length in minSize - MIN_SIZE_THRESHOLD until minSize) {
+private fun List<String>.fillToMinimumSize(minSize : Int) : List<String> =
+    map {
+        if (it.length in minSize - MIN_SIZE_THRESHOLD until minSize)
             it + "<".repeat(minSize - it.length)
-        } else {
+        else
             it
-        }
     }
-}
 
-private fun List<String>.fillToSameSize() : List<String>{
-    val maxLength = maxByOrNull {
-        it.length
-    }?.length ?: return this
+private fun List<String>.fillToSameSize(): List<String> {
+    val maxLength = maxByOrNull { it.length }?.length ?: return this
     return fillToMinimumSize(maxLength)
 }
 
@@ -89,14 +85,13 @@ private fun String.correctLines() : String {
 }
 
 object MrzTextPreProcessor {
-
     fun process(raw: String): String? {
-        val lineBreaks = raw.filter { c -> c == '\n' }.count()
+        val lineBreaks = raw.count { c -> c == '\n' }
         if (lineBreaks < 1)
             return null
 
         val preProcessed = raw.replace(" ", "")
-            .toUpperCase(Locale.ENGLISH)
+            .uppercase(Locale.ENGLISH)
             .replace(nonValidMrzChar, "<")
             .split("\n")
             .filter { it.length in MIN_POSSIBLE_CHAR_LENGTH_PER_LINE..MAX_POSSIBLE_CHAR_LENGTH_PER_LINE }
@@ -110,15 +105,11 @@ object MrzTextPreProcessor {
             )
             .correctLines()
 
-        return if(checkIfQualifiedForMrzParsing(preProcessed)) {
-            preProcessed
-        } else {
-            null
-        }
+        return if(checkIfQualifiedForMrzParsing(preProcessed)) preProcessed else null
     }
 
     private fun checkIfQualifiedForMrzParsing(text: String): Boolean {
-        val lineBreaks = text.filter { c -> c == '\n' }.count()
+        val lineBreaks = text.count { c -> c == '\n' }
 
         fun stringsSameLength(text: String): Boolean {
             val list = text.split("\n")

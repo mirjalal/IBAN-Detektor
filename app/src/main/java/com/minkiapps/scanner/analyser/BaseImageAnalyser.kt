@@ -27,7 +27,7 @@ abstract class BaseAnalyser<T>(private val scannerOverlay: ScannerOverlay,
     fun bitmapLiveData() : LiveData<Bitmap> = imageMutableData
     fun debugInfoLiveData() : LiveData<String> = debugInfoData
 
-    var emitDebugInfo : Boolean = true
+    private var emitDebugInfo : Boolean = true
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
@@ -114,44 +114,45 @@ abstract class BaseAnalyser<T>(private val scannerOverlay: ScannerOverlay,
 
     abstract fun onBitmapPrepared(bitmap: Bitmap)
 
-    data class ScannerRectToPreviewViewRelation(val relativePosX: Float,
-                                                val relativePosY: Float,
-                                                val relativeWidth: Float,
-                                                val relativeHeight: Float)
+    private data class ScannerRectToPreviewViewRelation(
+        val relativePosX: Float,
+        val relativePosY: Float,
+        val relativeWidth: Float,
+        val relativeHeight: Float
+    )
 
-    private fun Image.getCropRectAccordingToRotation(scannerRect: ScannerRectToPreviewViewRelation, rotation: Int) : Rect {
-        return when(rotation) {
+    private fun Image.getCropRectAccordingToRotation(scannerRect: ScannerRectToPreviewViewRelation, rotation: Int) : Rect =
+        when(rotation) {
             0 -> {
-                val startX = (scannerRect.relativePosX * this.width).toInt()
-                val numberPixelW = (scannerRect.relativeWidth * this.width).toInt()
-                val startY = (scannerRect.relativePosY * this.height).toInt()
-                val numberPixelH = (scannerRect.relativeHeight * this.height).toInt()
+                val startX = (scannerRect.relativePosX * width).toInt()
+                val numberPixelW = (scannerRect.relativeWidth * width).toInt()
+                val startY = (scannerRect.relativePosY * height).toInt()
+                val numberPixelH = (scannerRect.relativeHeight * height).toInt()
                 Rect(startX, startY, startX + numberPixelW, startY + numberPixelH)
             }
             90 -> {
-                val startX = (scannerRect.relativePosY * this.width).toInt()
-                val numberPixelW = (scannerRect.relativeHeight * this.width).toInt()
-                val numberPixelH = (scannerRect.relativeWidth * this.height).toInt()
-                val startY = height - (scannerRect.relativePosX * this.height).toInt() - numberPixelH
+                val startX = (scannerRect.relativePosY * width).toInt()
+                val numberPixelW = (scannerRect.relativeHeight * width).toInt()
+                val numberPixelH = (scannerRect.relativeWidth * height).toInt()
+                val startY = height - (scannerRect.relativePosX * height).toInt() - numberPixelH
                 Rect(startX, startY, startX + numberPixelW, startY + numberPixelH)
             }
             180 -> {
-                val numberPixelW = (scannerRect.relativeWidth * this.width).toInt()
-                val startX = (this.width - scannerRect.relativePosX * this.width - numberPixelW).toInt()
-                val numberPixelH = (scannerRect.relativeHeight * this.height).toInt()
-                val startY = (height - scannerRect.relativePosY * this.height - numberPixelH).toInt()
+                val numberPixelW = (scannerRect.relativeWidth * width).toInt()
+                val startX = (width - scannerRect.relativePosX * width - numberPixelW).toInt()
+                val numberPixelH = (scannerRect.relativeHeight * height).toInt()
+                val startY = (height - scannerRect.relativePosY * height - numberPixelH).toInt()
                 Rect(startX, startY, startX + numberPixelW, startY + numberPixelH)
             }
             270 -> {
-                val numberPixelW = (scannerRect.relativeHeight * this.width).toInt()
-                val numberPixelH = (scannerRect.relativeWidth * this.height).toInt()
-                val startX = (this.width - scannerRect.relativePosY * this.width - numberPixelW).toInt()
-                val startY = (scannerRect.relativePosX * this.height).toInt()
+                val numberPixelW = (scannerRect.relativeHeight * width).toInt()
+                val numberPixelH = (scannerRect.relativeWidth * height).toInt()
+                val startX = (width - scannerRect.relativePosY * width - numberPixelW).toInt()
+                val startY = (scannerRect.relativePosX * height).toInt()
                 Rect(startX, startY, startX + numberPixelW, startY + numberPixelH)
             }
             else -> throw IllegalArgumentException("Rotation degree ($rotation) not supported!")
         }
-    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     abstract fun close()

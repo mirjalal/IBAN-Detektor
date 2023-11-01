@@ -100,17 +100,16 @@ class IDAnalyser(scannerOverlay: ScannerOverlay,
                 || lines[0].contains("Adresse")
                 || lines[0].contains("Address")) {
             val addressText = block.lines.subList(1, lines.size).joinToString(separator = ", ") { it }
-            if(addressText.length > this.addressText?.length ?: 0) {
+            if(addressText.length > (this.addressText?.length ?: 0)) {
                 this.addressText = addressText
             }
         }
     }
 
-    private fun isPossibleMrzBlock(txt : String) : Boolean {
-        return (txt.filter { c -> c == '\n' }.count() >= 1
-                && txt.filter { c -> c == '<' }.count() > 10
-                && txt.split("\n").filter { it.length >= MIN_POSSIBLE_CHAR_LENGTH_PER_LINE }.size > 1)
-    }
+    private fun isPossibleMrzBlock(txt : String) : Boolean =
+        txt.count { it == '\n' } >= 1
+        && txt.count { it == '<' } > 10
+        && txt.split("\n").count { it.length >= MIN_POSSIBLE_CHAR_LENGTH_PER_LINE } > 1
 
     private fun parseMrz(processed : String) : Boolean {
         val record = MrzParser.parse(processed)
@@ -140,7 +139,9 @@ class IDAnalyser(scannerOverlay: ScannerOverlay,
                 birthDate = addCenturyToBirthDate(birthDate),
                 expirationDate = addCenturyToExpirationDate(expirationDate),
                 nationality = nationality,
-                gender = if(gender != null && gender != MrzSex.Unspecified) gender.name.toUpperCase(Locale.ENGLISH) else null,
+                gender = if(gender != null && gender != MrzSex.Unspecified) gender.name.uppercase(
+                    Locale.ENGLISH
+                ) else null,
                 nameNeedCorrection = nameNeedCorrection, scannedAddress = addressText)
 
             postResult(idResult)
