@@ -7,14 +7,13 @@ import com.minkiapps.scanner.scan.BaseScannerActivity
 
 class IDScannerActivity : BaseScannerActivity<IDResult>() {
 
+    override fun getScannerType(): ScannerOverlayImpl.Type = ScannerOverlayImpl.Type.ID
+
     override fun initImageAnalyser(mlService: BaseAnalyser.MLService): BaseAnalyser<IDResult> =
         IDAnalyser(binding.olActScanner, mlService)
 
-    override fun getScannerType(): ScannerOverlayImpl.Type = ScannerOverlayImpl.Type.ID
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         (analyser as IDAnalyser).mrzBlockLiveData.observe(this) {
             scannerOverlay().drawGraphicBlocks(listOf(it))
         }

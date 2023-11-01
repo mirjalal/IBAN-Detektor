@@ -7,8 +7,10 @@ import com.minkiapps.scanner.scan.BaseScannerActivity
 
 class IbanScannerActivity : BaseScannerActivity<String>() {
 
-    override fun getScannerType(): ScannerOverlayImpl.Type =
-        ScannerOverlayImpl.Type.IBAN
+    override fun getScannerType(): ScannerOverlayImpl.Type = ScannerOverlayImpl.Type.IBAN
+
+    override fun initImageAnalyser(mlService: BaseAnalyser.MLService): BaseAnalyser<String> =
+        IBANAnalyser(scannerOverlay(), mlService)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,7 +18,4 @@ class IbanScannerActivity : BaseScannerActivity<String>() {
             scannerOverlay().drawBlueRect = it
         }
     }
-
-    override fun initImageAnalyser(mlService: BaseAnalyser.MLService): BaseAnalyser<String> =
-        IBANAnalyser(scannerOverlay(), mlService)
 }
