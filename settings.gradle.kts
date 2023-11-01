@@ -16,5 +16,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "IBAN Detektor"
+rootProject.name = "IBAN Detektor Sample"
 include(":app")
+include(":ibandetektor")

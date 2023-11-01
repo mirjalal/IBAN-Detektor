@@ -6,7 +6,7 @@
 
     <application
         android:hardwareAccelerated="true"
-        android:name=".App"
+        android:name="aze.talmir.ibandetector.sample.App"
         android:allowBackup="false"
         android:fullBackupOnly="false"
         android:fullBackupContent="false"
@@ -17,27 +17,12 @@
         android:theme="@style/AppTheme"
         android:dataExtractionRules="@xml/data_extraction_rules">
 
-        <activity android:name="com.minkiapps.scanner.iban.IbanScannerActivity"/>
-
-        <activity android:name=".id.IDScannerActivity" />
-
-        <activity android:name=".sepaqr.SepaQrScannerActivity" />
-
-        <activity android:name=".MainActivity"
+        <activity android:name="aze.talmir.ibandetector.sample.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="ocr, barcode" />
-
-        <meta-data
-            android:name="com.huawei.hms.ml.DEPENDENCY"
-            android:value="ocr"/>
     </application>
 </manifest>
