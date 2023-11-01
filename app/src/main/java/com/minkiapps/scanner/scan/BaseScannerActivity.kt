@@ -3,10 +3,10 @@ package com.minkiapps.scanner.scan
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Size
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -15,7 +15,6 @@ import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_NONE
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import com.minkiapps.scanner.R
@@ -46,14 +45,14 @@ abstract class BaseScannerActivity<T> : AppCompatActivity() {
         setContentView(binding.root)
 
         // Request camera permissions
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(this,
-                REQUIRED_PERMISSIONS,
-                REQUEST_CODE_PERMISSIONS
-            )
-        }
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it)
+                startCamera()
+            else {
+                Toast.makeText(this, "Unable to start camera.", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }.launch(Manifest.permission.CAMERA)
 
         binding.olActScanner.type = getScannerType()
         binding.olActScanner.mlService = mlService
@@ -140,25 +139,6 @@ abstract class BaseScannerActivity<T> : AppCompatActivity() {
         binding.fabActScannerTorch.setImageResource(if(torchOn) R.drawable.ic_baseline_flash_off_24dp_white else R.drawable.ic_baseline_flash_on_24dp_white)
     }
 
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
-
     protected fun scannerOverlay() : ScannerOverlayImpl = binding.olActScanner
 
     abstract fun initImageAnalyser(mlService: BaseAnalyser.MLService): BaseAnalyser<T>
@@ -170,9 +150,6 @@ abstract class BaseScannerActivity<T> : AppCompatActivity() {
 
         private const val TARGET_PREVIEW_WIDTH = 960
         private const val TARGET_PREVIEW_HEIGHT = 1280
-
-        private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
         inline fun <reified T : AppCompatActivity> createIntent(
             context: Context, mobileService: BaseAnalyser.MLService
