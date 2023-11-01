@@ -11,19 +11,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
+import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_NONE
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import com.minkiapps.scanner.R
 import com.minkiapps.scanner.analyser.BaseAnalyser
+import com.minkiapps.scanner.databinding.ActivityScannerBinding
 import com.minkiapps.scanner.overlay.ScannerOverlayImpl
 import com.minkiapps.scanner.util.extraSerializableOrThrow
-import kotlinx.android.synthetic.main.activity_scanner.*
 import timber.log.Timber
 import java.util.concurrent.Executors
 
-abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scanner) {
+abstract class BaseScannerActivity<T> : AppCompatActivity() {
+
+    protected lateinit var binding: ActivityScannerBinding
 
     private var torchOn : Boolean = false
     private val analyserExecutor = Executors.newSingleThreadExecutor()
@@ -37,6 +42,9 @@ abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scan
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding = ActivityScannerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
@@ -47,40 +55,39 @@ abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scan
             )
         }
 
-        olActScanner.type = getScannerType()
-        olActScanner.mlService = mlService
+        binding.olActScanner.type = getScannerType()
+        binding.olActScanner.mlService = mlService
         setUp()
     }
 
     private fun setUp() {
-        analyser.bitmapLiveData().observe(this, {
-            ivActScannerCroppedPreview.setImageBitmap(it)
-        })
+        analyser.bitmapLiveData().observe(this) {
+            binding.ivActScannerCroppedPreview.setImageBitmap(it)
+        }
 
-        analyser.errorLiveData().observe(this, { e ->
+        analyser.errorLiveData().observe(this) { e ->
             Timber.e(e, "Analysing failed")
             Toast.makeText(this, "Scanner failed, reason: ${e.message}", Toast.LENGTH_LONG).show()
             finish()
-        })
+        }
 
-        analyser.liveData().observe(this, { result ->
-            tvActScannerScannedResult.text = ""
+        analyser.liveData().observe(this) { result ->
+            binding.tvActScannerScannedResult.text = ""
             result?.let {
-                tvActScannerScannedResult.text = it.toString()
+                binding.tvActScannerScannedResult.text = it.toString()
             }
-        })
+        }
 
-        analyser.debugInfoLiveData().observe(this, {
-            val surfaceView = pvActScanner[0]
+        analyser.debugInfoLiveData().observe(this) {
+            val surfaceView = binding.pvActScanner[0]
             val info = "$it\nPreview Size (${surfaceView.width}, ${surfaceView.height}) " +
                     "Translation (${surfaceView.translationX}, ${surfaceView.translationY}) " +
                     "Scale (${surfaceView.scaleX}, ${surfaceView.scaleY}) " +
                     "Pivot (${surfaceView.pivotX}, ${surfaceView.pivotY}) " +
                     "Rotation (${surfaceView.rotation}) " +
-                    "Container Size (${pvActScanner.width}, ${pvActScanner.height})"
-            //Transition (${surfaceView.translationX}, ${surfaceView.translationY}) Scale (${surfaceView.scaleX}, ${surfaceView.scaleY})
-            tvActScannerDebugInfo.text = info
-        })
+                    "Container Size (${binding.pvActScanner.width}, ${binding.pvActScanner.height})"
+            binding.tvActScannerDebugInfo.text = info
+        }
     }
 
     private fun startCamera() {
@@ -114,9 +121,9 @@ abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scan
 
                 // Bind use cases to camera
                 val camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
-                preview.setSurfaceProvider(pvActScanner.surfaceProvider)
+                preview.setSurfaceProvider(binding.pvActScanner.surfaceProvider)
 
-                fabActScannerTorch.setOnClickListener {
+                binding.fabActScannerTorch.setOnClickListener {
                     torchOn = !torchOn
                     camera.cameraControl.enableTorch(torchOn)
                     setTorchUI()
@@ -130,7 +137,7 @@ abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scan
     }
 
     private fun setTorchUI() {
-        fabActScannerTorch.setImageResource(if(torchOn) R.drawable.ic_baseline_flash_off_24dp_white else R.drawable.ic_baseline_flash_on_24dp_white)
+        binding.fabActScannerTorch.setImageResource(if(torchOn) R.drawable.ic_baseline_flash_off_24dp_white else R.drawable.ic_baseline_flash_on_24dp_white)
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -138,8 +145,8 @@ abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scan
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults:
-        IntArray) {
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
                 startCamera()
@@ -152,7 +159,7 @@ abstract class BaseScannerActivity<T> : AppCompatActivity(R.layout.activity_scan
         }
     }
 
-    protected fun scannerOverlay() : ScannerOverlayImpl = olActScanner
+    protected fun scannerOverlay() : ScannerOverlayImpl = binding.olActScanner
 
     abstract fun initImageAnalyser(mlService: BaseAnalyser.MLService): BaseAnalyser<T>
 
