@@ -1,7 +1,10 @@
+import org.gradle.api.publish.maven.internal.publication.DefaultMavenPomDeveloper
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
+    `maven-publish`
 }
 
 android {
@@ -10,6 +13,11 @@ android {
 
     defaultConfig {
         minSdk = 21
+
+        aarMetadata {
+            minCompileSdk = 21
+        }
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,6 +40,12 @@ android {
 
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+    publishing {
+        singleVariant("release") {
+            //withSourcesJar()
+        }
     }
 }
 
@@ -62,3 +76,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
 }
+
+group = "aze.talmir"
+version = "1.0.0"
